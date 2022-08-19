@@ -1,5 +1,5 @@
-const menuTemplate = (item) =>
-  `<li class="menu-list-item d-flex items-center py-2">
+const menuTemplate = (item, index) =>
+  `<li data-menu-id=${index} class="menu-list-item d-flex items-center py-2">
     <span class="w-100 pl-2 menu-name">${item.name}</span>
     <button
       type="button"

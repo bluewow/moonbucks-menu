@@ -25,8 +25,8 @@ TODO 메뉴 삭제
 step-2
 TODO localStorage Read & Write
 
-- [] localStorage 에 데이터를 저장한다
-- [] localStorage 에 데이터를 읽어온다
+- [v] localStorage 에 데이터를 저장한다
+- [v] localStorage 에 데이터를 읽어온다
 
 TODO 카테고리별 메뉴판 관리
 
