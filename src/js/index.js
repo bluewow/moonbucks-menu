@@ -15,11 +15,11 @@ function App() {
   this.menu = [];
 
   this.init = () => {
+    this.menu = store.getStorage();
     render();
   };
 
   const render = () => {
-    this.menu = store.getStorage();
     const template = this.menu
       .map((item, index) => menuTemplate(item, index))
       .join("");
@@ -44,6 +44,38 @@ function App() {
     $(".menu-count").innerText = `총 ${count}개`;
   };
 
+  const editButton = (e) => {
+    let menuName = e.target.closest("li").querySelector(".menu-name");
+    const menuId = e.target.closest("li").dataset.menuId;
+    const updatedMenuName = prompt(
+      "메뉴 이름을 수정해 주세요",
+      menuName.innerText
+    );
+    if (updatedMenuName) {
+      menuName.innerText = updatedMenuName;
+      this.menu[menuId].name = updatedMenuName;
+      store.setStorage(this.menu);
+    }
+  };
+
+  const deleteButton = (e) => {
+    if (confirm("메뉴를 삭제하시겠습니까?")) {
+      const menuId = e.target.closest("li").dataset.menuId;
+      this.menu.splice(menuId, 1);
+      store.setStorage(this.menu);
+
+      e.target.closest("li").remove();
+      updateCount();
+    }
+  };
+
+  const toggleButton = (e) => {
+    const menuId = e.target.closest("li").dataset.menuId;
+    this.menu[menuId].soldOut = !this.menu[menuId].soldOut;
+    store.setStorage(this.menu);
+    render();
+  };
+
   $("#espresso-menu-form").addEventListener("submit", (e) => {
     e.preventDefault();
   });
@@ -62,26 +94,16 @@ function App() {
 
   $("#espresso-menu-list").addEventListener("click", (e) => {
     if (e.target.classList.contains("menu-edit-button")) {
-      let menuName = e.target.closest("li").querySelector(".menu-name");
-      const menuId = e.target.closest("li").dataset.menuId;
-      const updatedMenuName = prompt(
-        "메뉴 이름을 수정해 주세요",
-        menuName.innerText
-      );
-      menuName.innerText = updatedMenuName;
-      this.menu[menuId].name = updatedMenuName;
-      store.setStorage(this.menu);
+      editButton(e);
       return;
     }
     if (e.target.classList.contains("menu-remove-button")) {
-      if (confirm("메뉴를 삭제하시겠습니까?")) {
-        const menuId = e.target.closest("li").dataset.menuId;
-        this.menu.splice(menuId, 1);
-        store.setStorage(this.menu);
+      deleteButton(e);
+      return;
+    }
 
-        e.target.closest("li").remove();
-        updateCount();
-      }
+    if (e.target.classList.contains("menu-sold-out-button")) {
+      toggleButton(e);
       return;
     }
   });
