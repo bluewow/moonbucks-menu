@@ -24,6 +24,10 @@ function App() {
       render();
     }
   });
+
+  $("#espresso-menu-submit-button").addEventListener("click", (e) => {
+    render();
+  });
 }
 
 const app = new App();
