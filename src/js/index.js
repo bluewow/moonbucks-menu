@@ -2,25 +2,35 @@ import menuTemplate from "../template/menuTemplate.js";
 
 const $ = (selector) => document.querySelector(selector);
 const store = {
-  setStorage(item) {
-    localStorage.setItem("menu", JSON.stringify(item));
+  setStorage(category, item) {
+    localStorage.setItem(category, JSON.stringify(item[category]));
   },
 
-  getStorage() {
-    return JSON.parse(localStorage.getItem("menu"));
+  getStorage(category) {
+    return JSON.parse(localStorage.getItem(category));
   },
 };
 
 function App() {
-  this.menu = [];
+  this.menu = {
+    espresso: [],
+    frappuccino: [],
+    blended: [],
+    teavana: [],
+    desert: [],
+  };
+  this.currentCategory = "espresso";
 
   this.init = () => {
-    this.menu = store.getStorage();
+    if (store.getStorage(this.currentCategory) != null) {
+      this.menu.map();
+      this.menu[this.currentCategory] = store.getStorage(this.currentCategory);
+    }
     render();
   };
 
   const render = () => {
-    const template = this.menu
+    const template = this.menu[this.currentCategory]
       .map((item, index) => menuTemplate(item, index))
       .join("");
     $("#espresso-menu-list").innerHTML = template;
@@ -34,8 +44,8 @@ function App() {
     }
 
     const menuName = $("#espresso-menu-name").value;
-    this.menu.push({ name: menuName });
-    store.setStorage(this.menu);
+    this.menu[this.currentCategory].push({ name: menuName });
+    store.setStorage(this.currentCategory, this.menu);
     $("#espresso-menu-name").value = "";
   };
 
@@ -54,7 +64,7 @@ function App() {
     if (updatedMenuName) {
       menuName.innerText = updatedMenuName;
       this.menu[menuId].name = updatedMenuName;
-      store.setStorage(this.menu);
+      store.setStorage(this.currentCategory, this.menu);
     }
   };
 
@@ -62,7 +72,7 @@ function App() {
     if (confirm("메뉴를 삭제하시겠습니까?")) {
       const menuId = e.target.closest("li").dataset.menuId;
       this.menu.splice(menuId, 1);
-      store.setStorage(this.menu);
+      store.setStorage(this.currentCategory, this.menu);
 
       e.target.closest("li").remove();
       updateCount();
@@ -72,7 +82,7 @@ function App() {
   const toggleButton = (e) => {
     const menuId = e.target.closest("li").dataset.menuId;
     this.menu[menuId].soldOut = !this.menu[menuId].soldOut;
-    store.setStorage(this.menu);
+    store.setStorage(this.currentCategory, this.menu);
     render();
   };
 
@@ -104,6 +114,14 @@ function App() {
 
     if (e.target.classList.contains("menu-sold-out-button")) {
       toggleButton(e);
+      return;
+    }
+  });
+
+  $("nav").addEventListener("click", (e) => {
+    if (e.target.classList.contains("cafe-category-name")) {
+      this.currentCategory = e.target.dataset.categoryName;
+      render();
       return;
     }
   });
