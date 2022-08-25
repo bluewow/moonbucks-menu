@@ -2,12 +2,12 @@ import menuTemplate from "../template/menuTemplate.js";
 
 const $ = (selector) => document.querySelector(selector);
 const store = {
-  setStorage(category, item) {
-    localStorage.setItem(category, JSON.stringify(item[category]));
+  setStorage(item) {
+    localStorage.setItem("menu", JSON.stringify(item));
   },
 
-  getStorage(category) {
-    return JSON.parse(localStorage.getItem(category));
+  getStorage() {
+    return JSON.parse(localStorage.getItem("menu"));
   },
 };
 
@@ -22,14 +22,23 @@ function App() {
   this.currentCategory = "espresso";
 
   this.init = () => {
-    if (store.getStorage(this.currentCategory) != null) {
-      this.menu.map();
-      this.menu[this.currentCategory] = store.getStorage(this.currentCategory);
+    if (store.getStorage() != null) {
+      this.menu = store.getStorage();
     }
     render();
   };
 
+  const clearMenuName = () => {
+    $("#espresso-menu-list").innerHTML = "";
+    updateCount();
+  };
+
   const render = () => {
+    if (this.menu[this.currentCategory].length === 0) {
+      clearMenuName();
+      return;
+    }
+
     const template = this.menu[this.currentCategory]
       .map((item, index) => menuTemplate(item, index))
       .join("");
@@ -45,7 +54,7 @@ function App() {
 
     const menuName = $("#espresso-menu-name").value;
     this.menu[this.currentCategory].push({ name: menuName });
-    store.setStorage(this.currentCategory, this.menu);
+    store.setStorage(this.menu);
     $("#espresso-menu-name").value = "";
   };
 
@@ -63,16 +72,16 @@ function App() {
     );
     if (updatedMenuName) {
       menuName.innerText = updatedMenuName;
-      this.menu[menuId].name = updatedMenuName;
-      store.setStorage(this.currentCategory, this.menu);
+      this.menu[this.currentCategory][menuId].name = updatedMenuName;
+      store.setStorage(this.menu);
     }
   };
 
   const deleteButton = (e) => {
     if (confirm("메뉴를 삭제하시겠습니까?")) {
       const menuId = e.target.closest("li").dataset.menuId;
-      this.menu.splice(menuId, 1);
-      store.setStorage(this.currentCategory, this.menu);
+      this.menu[this.currentCategory].splice(menuId, 1);
+      store.setStorage(this.menu);
 
       e.target.closest("li").remove();
       updateCount();
@@ -81,8 +90,9 @@ function App() {
 
   const toggleButton = (e) => {
     const menuId = e.target.closest("li").dataset.menuId;
-    this.menu[menuId].soldOut = !this.menu[menuId].soldOut;
-    store.setStorage(this.currentCategory, this.menu);
+    this.menu[this.currentCategory][menuId].soldOut =
+      !this.menu[this.currentCategory][menuId].soldOut;
+    store.setStorage(this.menu);
     render();
   };
 
@@ -121,6 +131,7 @@ function App() {
   $("nav").addEventListener("click", (e) => {
     if (e.target.classList.contains("cafe-category-name")) {
       this.currentCategory = e.target.dataset.categoryName;
+      this.menu = store.getStorage();
       render();
       return;
     }
